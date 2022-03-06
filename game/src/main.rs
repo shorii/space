@@ -7,6 +7,12 @@ struct Ship {
     speed: f32,
 }
 
+#[derive(Component)]
+struct Bullet {
+    speed: f32,
+    distance: f32,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum TextureStartupState {
     Setup,
@@ -74,6 +80,7 @@ fn setup(
 const TIME_STEP: f32 = 1.0 / 60.0;
 
 fn ship_movement_system(
+    mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&Ship, &mut Transform)>,
 ) {
@@ -82,17 +89,57 @@ fn ship_movement_system(
             let mut direction = 0.0;
             if keyboard_input.pressed(KeyCode::Down) {
                 direction -= 1.0;
+                transform.translation.y += direction * ship.speed * TIME_STEP;
+                transform.translation.y = transform.translation.y.min(380.0).max(-380.0);
+                return;
             }
             if keyboard_input.pressed(KeyCode::Up) {
                 direction += 1.0;
-            };
-            transform.translation.y += direction * ship.speed * TIME_STEP;
-            transform.translation.y = transform.translation.y.min(380.0).max(-380.0);
+                transform.translation.y += direction * ship.speed * TIME_STEP;
+                transform.translation.y = transform.translation.y.min(380.0).max(-380.0);
+                return;
+            }
+            if keyboard_input.pressed(KeyCode::Space) {
+                let mut fire_point = transform.translation;
+                fire_point.x += 30.0;
+                commands
+                    .spawn_bundle(SpriteBundle {
+                        transform: Transform {
+                            translation: fire_point,
+                            scale: Vec3::new(10.0, 10.0, 0.0),
+                            ..Default::default()
+                        },
+                        sprite: Sprite {
+                            color: Color::rgb(0.5, 0.5, 1.0),
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    })
+                    .insert(Bullet {
+                        speed: 500.0,
+                        distance: 600.0,
+                    });
+            }
         }
         Err(_) => {
             return;
         }
     }
+}
+
+fn bullet_movement_system(
+    mut commands: Commands,
+    mut query: Query<(Entity, &Bullet, &mut Transform)>,
+) {
+    query.for_each_mut(|bullet| {
+        let (e, b, mut transform) = bullet;
+        let mut direction = 0.0;
+        direction += 1.0;
+        transform.translation.x += direction * b.speed * TIME_STEP;
+        if transform.translation.x > 640.0 {
+            commands.entity(e).remove::<Bullet>();
+        }
+    });
 }
 
 fn main() {
@@ -106,9 +153,10 @@ fn main() {
         )
         .add_system_set(SystemSet::on_enter(TextureStartupState::Finished).with_system(setup))
         .add_system_set(
-            SystemSet::on_enter(TextureStartupState::Finished)
+            SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(ship_movement_system),
+                .with_system(ship_movement_system)
+                .with_system(bullet_movement_system),
         )
         .run();
 }
