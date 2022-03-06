@@ -77,16 +77,22 @@ fn ship_movement_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&Ship, &mut Transform)>,
 ) {
-    let (ship, mut transform) = query.single_mut();
-    let mut direction = 0.0;
-    if keyboard_input.pressed(KeyCode::Down) {
-        direction -= 1.0;
+    match query.get_single_mut() {
+        Ok((ship, mut transform)) => {
+            let mut direction = 0.0;
+            if keyboard_input.pressed(KeyCode::Down) {
+                direction -= 1.0;
+            }
+            if keyboard_input.pressed(KeyCode::Up) {
+                direction += 1.0;
+            };
+            transform.translation.y += direction * ship.speed * TIME_STEP;
+            transform.translation.y = transform.translation.y.min(380.0).max(-380.0);
+        }
+        Err(_) => {
+            return;
+        }
     }
-    if keyboard_input.pressed(KeyCode::Up) {
-        direction += 1.0;
-    };
-    transform.translation.y += direction * ship.speed * TIME_STEP;
-    transform.translation.y = transform.translation.y.min(380.0).max(-380.0);
 }
 
 fn main() {
@@ -99,11 +105,11 @@ fn main() {
             SystemSet::on_update(TextureStartupState::Setup).with_system(check_textures),
         )
         .add_system_set(SystemSet::on_enter(TextureStartupState::Finished).with_system(setup))
-        //.add_system_set(
-        //    SystemSet::new()
-        //        .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-        //        .with_system(ship_movement_system),
-        //)
+        .add_system_set(
+            SystemSet::on_enter(TextureStartupState::Finished)
+                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+                .with_system(ship_movement_system),
+        )
         .run();
 }
 
