@@ -4,9 +4,7 @@ use core::plugins::ship::ShipPlugin;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(ShipPlugin {
-            asset_path: "textures/UFO.png",
-        })
+        .add_plugin(ShipPlugin)
         .run();
 }
 
