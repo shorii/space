@@ -1,5 +1,5 @@
 use crate::assets::sprite::{TextureAtlasHandles, WithSprite};
-use crate::atoms::autonomous::{Autonomous, AutonomousProps};
+use crate::atoms::autonomous::{Autonomous, Direction, Movement};
 use crate::types::{ComponentProps, EntitySpawner};
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
@@ -28,14 +28,14 @@ impl Bullet {
 impl EntitySpawner for Bullet {
     fn spawn<'w, 's, 'a>(
         commands: &'a mut Commands<'w, 's>,
-        props: impl ComponentProps,
+        _props: impl ComponentProps,
     ) -> EntityCommands<'w, 's, 'a> {
         let mut entity_commands = commands.spawn();
         entity_commands.insert(Bullet {});
-        let props = AutonomousProps::default();
         entity_commands.insert(Autonomous {
-            speed: props.speed,
-            movement: props.movement,
+            speed: 500.0,
+            movement: Movement::Horizontal,
+            direction: Direction::Right,
         });
         entity_commands
     }
