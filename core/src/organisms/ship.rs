@@ -11,22 +11,16 @@ use std::any::TypeId;
 pub struct ShipProps {
     pub speed: f32,
     pub life: u32,
+    pub ship_asset_path: &'static str,
+    pub bullet_asset_path: &'static str,
 }
 
 impl ComponentProps for ShipProps {}
 
-impl Default for ShipProps {
-    fn default() -> Self {
-        Self {
-            speed: 500.0,
-            life: 5,
-        }
-    }
-}
-
 #[derive(Component)]
 pub struct Ship {
     pub speed: f32,
+    pub bullet_asset_path: &'static str,
 }
 
 impl Ship {
@@ -70,13 +64,13 @@ impl Ship {
                     fire_point.x += 30.0;
                     Bullet::spawn_with_sprite(
                         &mut commands,
-                        "textures/food_lemon_01.png",
                         asset_server,
                         texture_atlas_handles,
                         texture_atlases,
-                        Some(BulletProps {
+                        BulletProps {
                             fire_point: fire_point,
-                        }),
+                            asset_path: ship.bullet_asset_path,
+                        },
                     );
                 }
             }
@@ -90,15 +84,13 @@ impl Ship {
 impl EntitySpawner for Ship {
     fn spawn<'w, 's, 'a>(
         commands: &'a mut Commands<'w, 's>,
-        props: Option<impl ComponentProps>,
+        props: impl ComponentProps,
     ) -> EntityCommands<'w, 's, 'a> {
-        let ship_props: ShipProps = match props {
-            Some(p) => p.typed(),
-            None => ShipProps::default(),
-        };
+        let ship_props: ShipProps = props.typed();
         let mut entity_commands = commands.spawn();
         entity_commands.insert(Ship {
             speed: ship_props.speed,
+            bullet_asset_path: ship_props.bullet_asset_path,
         });
         entity_commands.insert(Life {
             life: ship_props.life,
@@ -109,17 +101,17 @@ impl EntitySpawner for Ship {
 
 impl WithSprite for Ship {
     fn get_sprite_sheet_bundle(
-        handle: &'static str,
         asset_server: Res<AssetServer>,
         texture_atlas_handles: Res<TextureAtlasHandles>,
         texture_atlases: Res<Assets<TextureAtlas>>,
-        _props: Option<impl ComponentProps>,
+        props: impl ComponentProps,
     ) -> Option<SpriteSheetBundle> {
+        let ship_props: ShipProps = props.typed();
         let atlas_handle = texture_atlas_handles.map.get(&TypeId::of::<TextureAtlas>());
         match atlas_handle {
             Some(ah) => {
                 let texture_atlas = texture_atlases.get(ah).unwrap();
-                let vendor_handle = asset_server.get_handle(handle);
+                let vendor_handle = asset_server.get_handle(ship_props.ship_asset_path);
                 let vendor_index = texture_atlas.get_texture_index(&vendor_handle).unwrap();
                 Some(SpriteSheetBundle {
                     transform: Transform {

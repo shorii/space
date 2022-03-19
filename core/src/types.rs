@@ -1,8 +1,9 @@
+use bevy::ecs::schedule::SystemDescriptor;
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use std::any::Any;
 
-pub trait ComponentProps: 'static + Default + Clone + Send + Sync {
+pub trait ComponentProps: 'static + Clone + Send + Sync {
     fn typed<T>(self) -> T
     where
         T: ComponentProps,
@@ -19,6 +20,10 @@ pub trait ComponentProps: 'static + Default + Clone + Send + Sync {
 pub trait EntitySpawner {
     fn spawn<'w, 's, 'a>(
         commands: &'a mut Commands<'w, 's>,
-        props: Option<impl ComponentProps>,
+        props: impl ComponentProps,
     ) -> EntityCommands<'w, 's, 'a>;
+}
+
+pub trait MainSystemDescriptorFactory {
+    fn system_descriptor(&self) -> SystemDescriptor;
 }

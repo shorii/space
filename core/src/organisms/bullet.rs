@@ -8,6 +8,7 @@ use std::any::TypeId;
 #[derive(Clone, Default)]
 pub struct BulletProps {
     pub fire_point: Vec3,
+    pub asset_path: &'static str,
 }
 
 impl ComponentProps for BulletProps {}
@@ -27,7 +28,7 @@ impl Bullet {
 impl EntitySpawner for Bullet {
     fn spawn<'w, 's, 'a>(
         commands: &'a mut Commands<'w, 's>,
-        _props: Option<impl ComponentProps>,
+        props: impl ComponentProps,
     ) -> EntityCommands<'w, 's, 'a> {
         let mut entity_commands = commands.spawn();
         entity_commands.insert(Bullet {});
@@ -42,21 +43,17 @@ impl EntitySpawner for Bullet {
 
 impl WithSprite for Bullet {
     fn get_sprite_sheet_bundle(
-        handle: &'static str,
         asset_server: Res<AssetServer>,
         texture_atlas_handles: Res<TextureAtlasHandles>,
         texture_atlases: Res<Assets<TextureAtlas>>,
-        props: Option<impl ComponentProps>,
+        props: impl ComponentProps,
     ) -> Option<SpriteSheetBundle> {
-        let bullet_props: BulletProps = match props {
-            Some(p) => p.typed(),
-            None => BulletProps::default(),
-        };
+        let bullet_props: BulletProps = props.typed();
         let atlas_handle = texture_atlas_handles.map.get(&TypeId::of::<TextureAtlas>());
         match atlas_handle {
             Some(ah) => {
                 let texture_atlas = texture_atlases.get(ah).unwrap();
-                let vendor_handle = asset_server.get_handle(handle);
+                let vendor_handle = asset_server.get_handle(bullet_props.asset_path);
                 let vendor_index = texture_atlas.get_texture_index(&vendor_handle).unwrap();
                 Some(SpriteSheetBundle {
                     transform: Transform {

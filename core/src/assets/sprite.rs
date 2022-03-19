@@ -62,22 +62,20 @@ pub fn setup_texture_atlas(
 
 pub trait WithSprite {
     fn get_sprite_sheet_bundle(
-        handle: &'static str,
         asset_server: Res<AssetServer>,
         texture_atlas_handles: Res<TextureAtlasHandles>,
         texture_atlases: Res<Assets<TextureAtlas>>,
-        props: Option<impl ComponentProps>,
+        props: impl ComponentProps,
     ) -> Option<SpriteSheetBundle>;
 }
 
 pub trait WithSpriteExt {
     fn spawn_with_sprite<'w, 's, 'a>(
         commands: &'a mut Commands<'w, 's>,
-        handle: &'static str,
         asset_server: Res<AssetServer>,
         texture_atlas_handles: Res<TextureAtlasHandles>,
         texture_atlases: Res<Assets<TextureAtlas>>,
-        props: Option<impl ComponentProps>,
+        props: impl ComponentProps,
     ) -> Option<EntityCommands<'w, 's, 'a>>;
 }
 
@@ -87,14 +85,12 @@ where
 {
     fn spawn_with_sprite<'w, 's, 'a>(
         commands: &'a mut Commands<'w, 's>,
-        handle: &'static str,
         asset_server: Res<AssetServer>,
         texture_atlas_handles: Res<TextureAtlasHandles>,
         texture_atlases: Res<Assets<TextureAtlas>>,
-        props: Option<impl ComponentProps>,
+        props: impl ComponentProps,
     ) -> Option<EntityCommands<'w, 's, 'a>> {
         let sprite_sheet_bundle = T::get_sprite_sheet_bundle(
-            handle,
             asset_server,
             texture_atlas_handles,
             texture_atlases,
