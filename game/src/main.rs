@@ -10,8 +10,8 @@ fn main() {
             ship_props: ShipProps {
                 speed: 500.0,
                 life: 5,
-                ship_asset_path: "textures/Ship.png",
-                bullet_asset_path: "textures/Bullet.png",
+                ship_asset_path: String::from("textures/Ship.png"),
+                bullet_asset_path: String::from("textures/Bullet.png"),
             },
         })
         .add_plugin(EnemyPlugin {

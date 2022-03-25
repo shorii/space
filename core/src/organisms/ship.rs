@@ -11,8 +11,8 @@ use std::any::TypeId;
 pub struct ShipProps {
     pub speed: f32,
     pub life: u32,
-    pub ship_asset_path: &'static str,
-    pub bullet_asset_path: &'static str,
+    pub ship_asset_path: String,
+    pub bullet_asset_path: String,
 }
 
 impl ComponentProps for ShipProps {}
@@ -20,7 +20,7 @@ impl ComponentProps for ShipProps {}
 #[derive(Component)]
 pub struct Ship {
     pub speed: f32,
-    pub bullet_asset_path: &'static str,
+    pub bullet_asset_path: String,
 }
 
 impl Ship {
@@ -69,7 +69,7 @@ impl Ship {
                         texture_atlases,
                         BulletProps {
                             fire_point: fire_point,
-                            asset_path: ship.bullet_asset_path,
+                            asset_path: ship.bullet_asset_path.clone(),
                         },
                     );
                 }

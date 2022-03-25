@@ -8,7 +8,7 @@ use std::any::TypeId;
 #[derive(Clone, Default)]
 pub struct BulletProps {
     pub fire_point: Vec3,
-    pub asset_path: &'static str,
+    pub asset_path: String,
 }
 
 impl ComponentProps for BulletProps {}
