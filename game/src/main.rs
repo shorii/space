@@ -1,11 +1,26 @@
 use bevy::prelude::*;
+use core::organisms::ship::ShipProps;
+use core::plugins::enemy::EnemyPlugin;
 use core::plugins::ship::ShipPlugin;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(ShipPlugin {
-            asset_path: "textures/UFO.png",
+            ship_props: ShipProps {
+                speed: 500.0,
+                life: 5,
+                ship_asset_path: String::from("textures/Ship.png"),
+                bullet_asset_path: String::from("textures/Bullet.png"),
+            },
+        })
+        .add_plugin(EnemyPlugin {
+            spawn_frequency: 1.0 / 1.0,
+            asset_paths: vec![
+                String::from("textures/Enemy1.png"),
+                String::from("textures/Enemy2.png"),
+                String::from("textures/Enemy3.png"),
+            ],
         })
         .run();
 }
